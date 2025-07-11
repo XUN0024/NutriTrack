@@ -8,9 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../_layout';
+import { signIn as authSignIn } from '../services/auth';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -19,15 +21,26 @@ export default function LoginScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
 
-  const handleLogin = () => {
-    setIsLoading(true);
-    // Simulate login process
-    setTimeout(() => {
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      // 先调用服务中的登录函数
+      const authData = await authSignIn(email, password);
+      // 使用类型断言
+      const user = {
+        id: (authData as any).session?.user?.id || email,
+        email: email,
+        name: (authData as any).session?.user?.user_metadata?.name
+      };
+      // 然后使用返回的用户数据更新全局状态
+      await signIn(user);
+      Alert.alert('login success');
+      router.replace('/');
+    } catch (err: any) {
+      Alert.alert('login failed', err.message || 'unknown error');
+    } finally {
       setIsLoading(false);
-      // Sign in the user with the auth context
-      signIn(email);
-      // Navigation will be handled by the auth context
-    }, 1500);
+    }
   };
 
   const handleSignUp = () => {
