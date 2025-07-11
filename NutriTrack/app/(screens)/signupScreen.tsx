@@ -8,9 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../_layout';
+import { signUp } from '../services/auth';
 
 export default function SignupScreen() {
   const [name, setName] = useState('');
@@ -21,20 +23,36 @@ export default function SignupScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
 
-  const handleSignup = () => {
-    if (password !== confirmPassword) {
-      alert("Passwords don't match");
+  const handleSignup = async () => {
+    if (!name || !email || !password) {
+      Alert.alert('提示', '请填写所有必填字段');
       return;
     }
-
+    
+    if (password !== confirmPassword) {
+      Alert.alert('提示', '两次输入的密码不一致');
+      return;
+    }
+    
+    // 简单的邮箱格式验证
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('提示', '请输入有效的邮箱地址');
+      return;
+    }
+    
     setIsLoading(true);
-    // Simulate signup process
-    setTimeout(() => {
+    
+    try {
+      // 修改 signUp 函数，传入用户名
+      const result = await signUp(email, password, name);
+      Alert.alert('注册成功', '请检查邮箱验证邮件！');
+      router.replace('/(screens)/loginScreen');
+    } catch (err: any) {
+      Alert.alert('注册失败', err.message);
+    } finally {
       setIsLoading(false);
-      // Sign in the user with the auth context
-      signIn(email);
-      // Navigation will be handled by the auth context
-    }, 1500);
+    }
   };
 
   const handleLogin = () => {
@@ -45,7 +63,7 @@ export default function SignupScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'android' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerContainer}>
@@ -54,10 +72,10 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Full Name</Text>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your full name"
+            placeholder="Enter your username"
             value={name}
             onChangeText={setName}
           />
