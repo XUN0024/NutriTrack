@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/app/_layout';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    // Navigate to login screen
+  const handleLogout = async () => {
+    await signOut();
     router.replace('/(screens)/loginScreen');
   };
 
