@@ -93,15 +93,16 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLoading) return; // Don't redirect while loading
 
     const inAuthGroup = segments[0] === '(screens)';
-    
+    const allowList = ['addMealScreen'];
+    const currentScreen = segments[1] ?? '';
+
     if (!user && !inAuthGroup) {
       // If the user is not signed in and not in auth group, redirect to login
-      // We use setTimeout to ensure this happens after initial render
       setTimeout(() => {
         rootRouter.replace('/(screens)/loginScreen');
       }, 0);
-    } else if (user && inAuthGroup) {
-      // If the user is signed in and in auth group, redirect to home
+    } else if (user && inAuthGroup && !allowList.includes(currentScreen)) {
+      // If the user is signed in and in auth group, but not in allowList, redirect to home
       setTimeout(() => {
         rootRouter.replace('/(tabs)');
       }, 0);

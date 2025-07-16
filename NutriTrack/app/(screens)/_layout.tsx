@@ -17,6 +17,13 @@ export default function AuthLayout() {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="addMealScreen"
+        options={{
+          title: 'Add Meal',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 } 
